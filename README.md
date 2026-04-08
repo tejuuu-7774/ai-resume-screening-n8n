@@ -32,8 +32,7 @@ It compares candidate resumes with a job description using AI and sends automate
 ---
 
 ## Workflow Screenshot
-<img width="1303" height="343" alt="Screenshot 2026-04-08 at 10 09 04 AM" src="https://github.com/user-attachments/assets/380839de-ffe3-44f2-87a9-e40f52d2066a" />
-
+<img width="1307" height="376" alt="Screenshot 2026-04-08 at 10 11 31 AM" src="https://github.com/user-attachments/assets/8ca358a6-7acb-44bb-9ae8-16ecc67641de" />
 
 ---
 
@@ -56,4 +55,4 @@ Helps automate resume screening and reduces manual effort in hiring processes.
 ---
 
 ## 👩‍💻 Author
-Teju
+Tejaswini Palwai
