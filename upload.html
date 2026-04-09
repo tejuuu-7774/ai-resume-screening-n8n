@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Resume Screener</title>
+  <link rel="stylesheet" href="upload.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h2>AI Resume Screening</h2>
+    <p class="subtitle">Upload your resume and job description</p>
+
+    <form action="https://tejaswinipalwai.app.n8n.cloud/webhook-test/upload-resume" method="POST" enctype="multipart/form-data">
+      
+      <label>📄 Resume</label>
+      <input type="file" name="resume" required />
+
+      <label>📑 Job Description</label>
+      <input type="file" name="jd" required />
+
+      <button type="submit">Analyze</button>
+    </form>
+  </div>
+</body>
+</html>
