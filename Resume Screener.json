@@ -1,0 +1,356 @@
+{
+  "name": "Resume Screener",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer gsk_xxxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content:\n        \"Resume:\\n\" +\n        $json.resume_text +\n        \"\\n\\nJob Description:\\n\" +\n        $json.jd_text +\n        \"\\n\\nTASK:\\nEvaluate the candidate.\\n\\nSTRICT OUTPUT:\\n{\\n  \\\"score\\\": integer (0-100),\\n  \\\"decision\\\": \\\"Selected\\\" or \\\"Rejected\\\",\\n  \\\"reason\\\": \\\"short explanation\\\"\\n}\\n\\nRULES:\\n- score MUST be integer\\n- NO decimals\\n- ONLY JSON output\"\n    }\n  ]\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        736,
+        32
+      ],
+      "id": "3dc3a574-9843-4f64-8507-36b94567ef1a",
+      "name": "HTTP Request",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8cf01c74-358e-4171-96f0-5cb21520c02e",
+              "leftValue": "={{ Number($json.score) }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        32
+      ],
+      "id": "22fc3e6b-ca13-4edb-b9e6-31b91608fd54",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "225c6059-f0e5-4be8-a693-822ef92ab075",
+              "name": "score",
+              "value": "={{ \nJSON.parse(\n  $json.choices[0].message.content.match(/\\{[\\s\\S]*\\}/)[0]\n).score \n}}",
+              "type": "string"
+            },
+            {
+              "id": "07fcf601-53be-40d9-b14a-fffc774bf7fe",
+              "name": "decision",
+              "value": "={{ \nJSON.parse(\n  $json.choices[0].message.content.match(/\\{[\\s\\S]*\\}/)[0]\n).decision \n}}",
+              "type": "string"
+            },
+            {
+              "id": "e287d84a-d6b9-40df-b73c-4ddcdbc260ac",
+              "name": "reason",
+              "value": "={{ \nJSON.parse(\n  $json.choices[0].message.content.match(/\\{[\\s\\S]*\\}/)[0]\n).reason \n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        32
+      ],
+      "id": "e4bf2521-9395-4ec4-ac05-d01dd90059e2",
+      "name": "Extract AI Output"
+    },
+    {
+      "parameters": {
+        "fromEmail": "palwaitejaswini7777@gmail.com",
+        "toEmail": "palwaitejaswini7777@gmail.com",
+        "subject": "Application Update",
+        "emailFormat": "text",
+        "text": "Hi,\n\nThank you for applying.\n\nUnfortunately, we will not proceed further.\n\n- HR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1520,
+        96
+      ],
+      "id": "b06cf7fc-d98f-4a8e-8da0-8d47b351ede2",
+      "name": "Rejection Email",
+      "webhookId": "e7180713-dba7-4a17-96e7-a9c3fffa63b7",
+      "credentials": {
+        "smtp": {
+          "id": "nKUiz80W7MSGuGmg",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "palwaitejaswini7777@gmail.com",
+        "toEmail": "palwaitejaswini7777@gmail.com",
+        "subject": "Congratulations! You are shortlisted 🎉",
+        "emailFormat": "text",
+        "text": "=Hi,\n\nYou have been shortlisted!\n\nScore: {{$json.score}}\nReason: {{$json.reason}}\n\nWe will contact you soon.\n\n- HR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1536,
+        -64
+      ],
+      "id": "8482e4ce-c6e4-4ad1-86ad-81b0fe26073f",
+      "name": "Selection Email",
+      "webhookId": "01b21bb5-f74d-4d73-b61d-ac320dba67c7",
+      "credentials": {
+        "smtp": {
+          "id": "nKUiz80W7MSGuGmg",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "22a2eb33-758a-49de-998f-9c04e37a0b21",
+      "name": "Webhook",
+      "webhookId": "5c4331ea-a3bb-460e-b516-dc7f72a6cffd"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        -144
+      ],
+      "id": "64fddbe8-ea26-414f-81dc-4d389d501424",
+      "name": "PDF Extract (Resume)"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "jd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        176
+      ],
+      "id": "3e2754b7-d387-48b5-b06a-e5b96edd65fa",
+      "name": "PDF Extract (JD)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        256,
+        32
+      ],
+      "id": "94425461-8edc-4ca1-96f5-1875fa666115",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aff425fe-a6b7-4924-a457-7efad83eb445",
+              "name": "resume_text",
+              "value": "={{$items()[0].json.text}}",
+              "type": "string"
+            },
+            {
+              "id": "b7b8837b-a73f-4149-bac0-d6ef672633a2",
+              "name": "jd_text",
+              "value": "={{$items()[1].json.text}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        32
+      ],
+      "id": "3145f840-8e81-4580-b35d-9831d503c1a5",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Selection Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejection Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract AI Output": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "PDF Extract (JD)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PDF Extract (Resume)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Extract (Resume)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Extract (JD)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3478b09a-f9b7-496c-aabc-01e1e95ba50c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "89b72dd0de25e78edb30acbdb1b1ccd9fa921c78381d73a2221a78e4e512873f"
+  },
+  "id": "yMIYsKDCgxbPL098",
+  "tags": []
+}
